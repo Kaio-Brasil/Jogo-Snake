@@ -12,6 +12,13 @@ function criarSnake()
 end
 
 -----------------------------------------------------------------------------------------
+--Som
+local som = audio.loadSound( "appleeat.wav" )
+function fazerSom()
+    audio.play(som)
+end
+
+-----------------------------------------------------------------------------------------
 --Pontuação
 local pontos = 0
 
@@ -19,6 +26,7 @@ function pontuar(ponto)
     pontos = pontos + ponto
     mostrarPontuacao()
     dificutarJogo()
+    fazerSom()
 end
 
 function zerarPontos()
@@ -125,24 +133,24 @@ end
 --Criar botoes
 function criarBotoes() 
     botaoUp = display.newRect(display.contentWidth * 0.5, 390, 80, 40)
-    local textoUp = {x = 160, y = 390, text = "Up"}
-    local textoBotaoUp = display.newText(textoUp)
-    textoBotaoUp:setTextColor(0, 0, 0)
+    local medTrianTop = {0,-10, 15,-30, 30,-10}
+    local trianTop = display.newPolygon(display.contentWidth * 0.5, 390, medTrianTop)
+    trianTop:setFillColor(0,0,0)
 
     botaoRight = display.newRect(display.contentWidth * 0.8, 440, 80, 40)
-    local textoRight = {x = 256, y = 440, text = "Right"}
-    local textoBotaoRight = display.newText(textoRight)
-    textoBotaoRight:setTextColor(0, 0, 0)
+    local medTrianRight = {0,-10, 0,-36, 22,-22}
+    local trianRight = display.newPolygon(display.contentWidth * 0.81, 440, medTrianRight)
+    trianRight:setFillColor(0, 0, 0)
 
     botaoDown = display.newRect(display.contentWidth * 0.5, 490, 80, 40)
-    local textoDown = {x = 160, y = 490, text = "Down"}
-    local textoBotaoDown = display.newText(textoDown)
-    textoBotaoDown:setTextColor(0, 0, 0)
+    local medTrianBotton = {0,10, 14,30, 28,10}
+    local trianBotton = display.newPolygon(display.contentWidth * 0.5, 491, medTrianBotton)
+    trianBotton:setFillColor(0, 0, 0 )
 
     botaoLeft = display.newRect(display.contentWidth * 0.2, 440, 80, 40)
-    local textoLeft = {x = 65, y = 440, text = "Left"}
-    local textoBotaoLeft = display.newText(textoLeft)
-    textoBotaoLeft:setTextColor(0, 0, 0)
+    local medTrianLeft = {0,10, 0,36, -22,24}
+    local trianLeft = display.newPolygon(display.contentWidth * 0.19, 440, medTrianLeft)
+    trianLeft:setFillColor(0, 0, 0)
 end
 
 -----------------------------------------------------------------------------------------
@@ -195,19 +203,19 @@ local function checarColisao()
 	
 	--Checar colisão
     if posX < 15 or posX > 305 then
-		iniciarJogo()
+		reiniciarJogo()
 	    return
 	end
 
     if posY < 10 or posY > 340 then
-	    iniciarJogo()
+	    reiniciarJogo()
 	    return
 	end
 	
 	for i, v in ipairs(snake) do
 		if (posX + eixoX) == v.x and (posY + eixoY) == v.y then
             if i ~= #snake then
-				iniciarJogo()
+				reiniciarJogo()
 				return
 			end
 		end
@@ -263,8 +271,8 @@ function jogar()
 end
 
 -----------------------------------------------------------------------------------------
---Iniciar jogo
-function iniciarJogo()
+--Reiniciar jogo
+function reiniciarJogo()
     timer.pause(timerEvento)
     local cenario = display.newRect(0, 0, display.contentWidth*2, display.contentHeight*3)
     cenario:setFillColor(0, 0, 0)
@@ -296,14 +304,43 @@ function iniciarJogo()
 end
 
 -----------------------------------------------------------------------------------------
+--Iniciar jogo
+function iniciarJogo()
+    local cenario = display.newRect(0, 0, display.contentWidth*2, display.contentHeight*3)
+    cenario:setFillColor(0, 0, 0)
+
+    local logo = display.newImageRect("logojogo.png", 200, 100)
+    logo.x, logo.y = display.contentWidth*0.5, display.contentHeight*0.25
+    
+    local botaoJogar = display.newRect(display.contentWidth*0.5, display.contentHeight*0.8, 120, 40)
+    local textoBotaoJogar = {x = display.contentWidth*0.5, y = display.contentHeight*0.8, text = "Jogar"}
+    local textoJogarJogo = display.newText(textoBotaoJogar)
+    textoJogarJogo:setTextColor(0, 0, 0)
+
+    function botaoJogar:touch(event)
+        if event.phase == "began" then
+            display.remove(cenario)
+            display.remove(logo)
+            display.remove(botaoJogar)
+            textoBotaoJogar = nil
+            display.remove(textoJogarJogo)
+
+            timerEvento = timer.performWithDelay(100, jogar, 0)       
+            return true 
+        end
+    end
+    botaoJogar:addEventListener("touch", botaoJogar)
+end
+
+-----------------------------------------------------------------------------------------
 --Ações
-timerEvento = timer.performWithDelay(100, jogar, 0)
 criarSnake()
 criarComida()
 criarCenario()
 criarBotoes()
 mostrarPontuacao()
 mostrarUltimaPontuacao()
+iniciarJogo()
 
 -----------------------------------------------------------------------------------------
  --Event botões
